@@ -89,11 +89,11 @@ int main(int argc, char *argv[])
         exit (EXIT_FAILURE);
     }
 
+    // start observation
     pthread_attr_setscope (&pthread_attr, PTHREAD_SCOPE_SYSTEM);
     sem_init (&empty, SHARED, 1);
     sem_init (&full, SHARED, 0);
 
-    // start observation
     if (pthread_create (&pthread, &pthread_attr, pthread_sysinfo, NULL) != 0)
     {
         perror("pthread_create");
