@@ -72,6 +72,7 @@ int ram_usage (json_t *ram_state)
                                  "Free swap",     swap_free, "Unit",       mem_unit);
 
     json_object_update_missing (ram_state, meminfo);
+    json_decref (meminfo);
 
     return 0;
 }

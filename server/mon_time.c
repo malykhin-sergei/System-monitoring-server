@@ -10,9 +10,12 @@ int time_stamp (json_t *time_stmp)
     tmp = localtime(&t);
 
     char current_time[TIME_STR_MAXLEN];
+    json_t *json_curr_time;
 
     strftime (current_time, TIME_STR_MAXLEN, "%c", tmp);
-    json_object_set (time_stmp, "Time", json_string (current_time));
+    json_curr_time = json_string (current_time);
+    json_object_set (time_stmp, "Time", json_curr_time);
+    json_decref (json_curr_time);
 
     return 0;
 }

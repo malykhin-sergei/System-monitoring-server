@@ -34,6 +34,7 @@ int net_usage (json_t *net_state)
                                                "Interface", ifa->ifa_name,
                                                "IP", host);
             json_array_append (net_state, interface);
+            json_decref (interface);
         }
     }
 

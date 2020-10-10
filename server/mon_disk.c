@@ -9,7 +9,6 @@
 
 int storage_usage (json_t *storage_state)
 {
-    json_t *device;
     FILE* mtab = setmntent (_PATH_MOUNTED, "r");
     struct mntent* m;
 
@@ -24,6 +23,7 @@ int storage_usage (json_t *storage_state)
                  !fnmatch (NVME_DEV,         m->mnt_fsname, 0)))
         {
 
+            json_t *device;
             device = json_pack ("{s:s, s:s, s:I, s:I, s:I, s:I}",
                                 "Filesystem",     m->mnt_fsname,
                                 "Mount Point",    m->mnt_dir,
@@ -33,8 +33,10 @@ int storage_usage (json_t *storage_state)
                                 "Block size, kB", fs.f_bsize / 1024);
 //                              "Usage, %", (1000 * (size - free) / (size - free + avail) + 5) / 10);
             json_array_append (storage_state, device);
+            json_decref (device);
         }
     }
+    
     endmntent (mtab);
     return 0;
 }

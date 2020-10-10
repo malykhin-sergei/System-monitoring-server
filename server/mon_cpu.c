@@ -62,7 +62,10 @@ int cpu_usage (json_t *cpu_state)
         }
 
         int cpu_usage_pct = (1000 *((sum - lastSum) - (idle - lastIdle)) / (sum - lastSum) + 5) / 10;
-        json_array_append (cpu_state, json_integer(cpu_usage_pct));
+        json_t *json_cpu_pct;
+        json_cpu_pct = json_integer(cpu_usage_pct);
+        json_array_append (cpu_state, json_cpu_pct);
+        json_decref (json_cpu_pct);
     }
     return 0;
 }
