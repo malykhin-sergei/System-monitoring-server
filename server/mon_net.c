@@ -23,7 +23,7 @@ int net_usage (json_t *net_state)
         family = ifa->ifa_addr->sa_family;
 
         /* Get interface name and family.
-           For an AF_INET* interface address, display the address */
+           For an AF_INET* interface address, get the IP address */
 
         if (family == AF_INET )
         {
