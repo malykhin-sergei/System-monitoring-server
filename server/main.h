@@ -21,7 +21,6 @@ typedef struct pthread_arg_t
     struct sockaddr_in client_address;
 } pthread_arg_t;
 
-char *system_state;
 char *system_state_report();
 
 enum protocol_type { TCP, UDP };

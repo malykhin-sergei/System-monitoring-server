@@ -1,6 +1,7 @@
 #include "main.h"
 
 int connections = 0;
+char system_state[4096];
 
 int main(int argc, char *argv[])
 {
@@ -183,7 +184,14 @@ int main(int argc, char *argv[])
 
 void *pthread_sysinfo ()
 {
-    for (;; system_state = system_state_report ());
+    for (;;) 
+        {
+            char *s = system_state_report ();
+            strcpy (system_state, s);
+            free (s);
+            sleep (1);
+//            printf ("%s\n", system_state);
+        }
     return NULL;
 }
 

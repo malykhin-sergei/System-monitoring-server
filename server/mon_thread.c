@@ -1,6 +1,7 @@
 #include "main.h"
 
 extern int connections;
+char system_state[4096];
 
 void *pthread_routine_tcp (void *arg)
 {
