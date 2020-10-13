@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     /* Obtain address(es) matching host/port */
 
     memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_INET;       /* Allow IPv4 */
+    hints.ai_family = AF_UNSPEC;     /* Allow IPv4 or IPv6 */
     hints.ai_socktype = 0;           /* Any type: TCP/UDP */
     hints.ai_flags = 0;
     hints.ai_protocol = 0;           /* Any protocol */
