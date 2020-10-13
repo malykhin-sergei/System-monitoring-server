@@ -2,7 +2,6 @@
 
 extern int connections;
 char system_state[4096];
-sem_t empty, full;
 
 void *pthread_routine_tcp (void *arg)
 {
@@ -27,9 +26,9 @@ void *pthread_routine_tcp (void *arg)
 
         if (strncmp ("report", msg_buffer, 6) == 0)
         {
-            sem_wait (&full);
+            pthread_rwlock_rdlock (&rwlock);
             write (tcp_socket_fd, system_state, strlen(system_state) + 1);
-            sem_post (&empty);
+            pthread_rwlock_unlock (&rwlock);
         }
     }
 

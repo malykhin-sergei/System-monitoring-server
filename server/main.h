@@ -1,6 +1,6 @@
 #ifndef MAIN_H_
 #define MAIN_H_
-
+#define _POSIX_C_SOURCE 200112L
 #include <netinet/in.h>
 #include <pthread.h>
 #include <signal.h>
@@ -12,10 +12,10 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include <unistd.h>
-#include <semaphore.h>
-#define SHARED 1
 
 #define BACKLOG 50
+
+pthread_rwlock_t rwlock;
 
 typedef struct pthread_arg_t
 {

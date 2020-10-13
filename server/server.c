@@ -2,7 +2,6 @@
 
 int connections = 0;
 char system_state[4096];
-sem_t empty, full;
 
 int main(int argc, char *argv[])
 {
@@ -89,11 +88,10 @@ int main(int argc, char *argv[])
         exit (EXIT_FAILURE);
     }
 
-    pthread_attr_setscope (&pthread_attr, PTHREAD_SCOPE_SYSTEM);
-    sem_init (&empty, SHARED, 1);
-    sem_init (&full, SHARED, 0);
 
     // start observation
+    pthread_rwlock_init (&rwlock, NULL);
+    
     if (pthread_create (&pthread, &pthread_attr, pthread_sysinfo, NULL) != 0)
     {
         perror("pthread_create");
@@ -191,9 +189,9 @@ void *pthread_sysinfo ()
     for (;;) 
         {
             char *s = system_state_report ();
-            sem_wait (&empty);
+            pthread_rwlock_wrlock (&rwlock);
             strcpy (system_state, s);
-            sem_post (&full);
+            pthread_rwlock_unlock (&rwlock);
             free (s);
         }
     return NULL;
