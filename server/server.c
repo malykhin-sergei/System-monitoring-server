@@ -2,25 +2,15 @@
 
 int connections = 0;
 char system_state[4096];
+enum protocol_type protocol;
 
 int main(int argc, char *argv[])
 {
-    struct timeval timeout = {5, 0};
-    struct sockaddr_in server_address, client_address;
-
-    pthread_attr_t pthread_attr;
-    pthread_arg_t *pthread_arg;
-    pthread_t pthread;
-
-    // Parse command line arguments
-
     if (argc != 4)
     {
         printf ("Usage: %s <TCP/UDP> <port> <max_connections>\n", argv[0]);
         return 0;
     }
-
-    enum protocol_type protocol;
 
     if (strncmp ("TCP", argv[1], 3) == 0)
     {
@@ -60,6 +50,7 @@ int main(int argc, char *argv[])
     printf (" on port %i with no more than %i clients\n", port, max_connections);
 
     /* Assign signal handlers to signals. */
+
     if (signal (SIGPIPE, SIG_IGN) == SIG_ERR)
     {
         perror ("signal");
@@ -76,7 +67,10 @@ int main(int argc, char *argv[])
         exit (EXIT_FAILURE);
     }
 
-    /* Initialise pthread attribute to create detached threads. */
+    pthread_attr_t pthread_attr;
+    pthread_arg_t *pthread_arg;
+    pthread_t pthread;
+
     if (pthread_attr_init (&pthread_attr) != 0)
     {
         perror("pthread_attr_init");
@@ -88,8 +82,8 @@ int main(int argc, char *argv[])
         exit (EXIT_FAILURE);
     }
 
-
     // start observation
+
     pthread_rwlock_init (&rwlock, NULL);
     
     if (pthread_create (&pthread, &pthread_attr, pthread_sysinfo, NULL) != 0)
@@ -99,6 +93,10 @@ int main(int argc, char *argv[])
     }
 
     /* Initialise IPv4 address. */
+
+    struct timeval timeout = {5, 0};
+    struct sockaddr_in server_address, client_address;
+
     memset (&server_address, 0, sizeof server_address);
     memset (&client_address, 0, sizeof client_address);
 
@@ -187,13 +185,20 @@ int main(int argc, char *argv[])
 
 void *pthread_sysinfo ()
 {
+    char *s = system_state_report ();
+    strcpy (system_state, s);
+    free (s);
+    
     for (;;) 
         {
-            char *s = system_state_report ();
-            pthread_rwlock_wrlock (&rwlock);
-            strcpy (system_state, s);
-            pthread_rwlock_unlock (&rwlock);
-            free (s);
+            if (connections > 0 || protocol == UDP)
+            {
+                s = system_state_report ();
+                pthread_rwlock_wrlock (&rwlock);
+                strcpy (system_state, s);
+                pthread_rwlock_unlock (&rwlock);
+                free (s);
+            }
         }
     return NULL;
 }
