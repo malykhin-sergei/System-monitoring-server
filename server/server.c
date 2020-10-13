@@ -131,7 +131,8 @@ int main(int argc, char *argv[])
     if (protocol == UDP)
     {
         setsockopt (socket_fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
-        for (;; udp_reply (socket_fd, client_address));
+//        for (;; udp_reply (socket_fd, client_address));
+          for (;; udp_reply (socket_fd));
     }
 
     if (listen (socket_fd, BACKLOG) == -1)

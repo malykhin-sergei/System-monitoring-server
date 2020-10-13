@@ -33,7 +33,8 @@ void *pthread_sysinfo ();
 /* Thread routine to serve TCP connection to client. */
 void *pthread_routine_tcp (void *arg);
 
-int udp_reply (const int socket_fd, struct sockaddr_in client_address);
+// int udp_reply (const int socket_fd, struct sockaddr_in client_address);
+int udp_reply (const int socket_fd);
 
 /* Signal handler to handle SIGTERM and SIGINT signals. */
 void signal_handler (int signal_number);

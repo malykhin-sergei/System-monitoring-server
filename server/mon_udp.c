@@ -2,8 +2,10 @@
 
 extern char system_state[4096];
 
-int udp_reply (const int socket_fd, struct sockaddr_in client_address)
+// int udp_reply (const int socket_fd, struct sockaddr_in client_address)
+int udp_reply (const int socket_fd)
 {
+    struct sockaddr_in client_address; // check
     socklen_t len = sizeof (client_address);
     char msg_buffer[80];
     bzero (msg_buffer, 80);
