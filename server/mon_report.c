@@ -19,8 +19,7 @@ char *system_state_report ()
     time_stamp (root);
 
     char *s = json_dumps (root, 0);
-    // FIXME The return value must be freed by the caller using free().
-        
+
     json_decref (root);
     return s;
 }

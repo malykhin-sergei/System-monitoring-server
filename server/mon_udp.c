@@ -12,8 +12,8 @@
 #include <unistd.h>
 #include "main.h"
 
-extern pthread_rwlock_t rwlock;
 extern char system_state[4096];
+extern pthread_rwlock_t rwlock;
 
 int udp_reply (const int socket_fd)
 {
@@ -30,9 +30,11 @@ int udp_reply (const int socket_fd)
 
     if (strncmp ("report", msg_buffer, 6) == 0)
     {
+//        char *msg = system_state_report ();
+//        sendto (socket_fd, msg, strlen (msg) + 1, 0, (struct sockaddr*)&client_address, len);
         pthread_rwlock_rdlock (&rwlock);
-        sendto (socket_fd, system_state, strlen (system_state) + 1, 0,
-                (struct sockaddr*)&client_address, len);
+        sendto (socket_fd, system_state, strlen (system_state) + 1, 
+            0, (struct sockaddr*)&client_address, len);
         pthread_rwlock_unlock (&rwlock);
     }
 

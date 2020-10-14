@@ -9,8 +9,11 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/select.h>
+#include <netdb.h>
 #include <unistd.h>
 #include "main.h"
+
+#define BUF_SIZE 500
 
 pthread_rwlock_t rwlock;
 
@@ -105,52 +108,59 @@ int main(int argc, char *argv[])
     // start observation
 
     pthread_rwlock_init (&rwlock, NULL);
-    
     if (pthread_create (&pthread, &pthread_attr, pthread_sysinfo, NULL) != 0)
     {
         perror("pthread_create");
         exit (EXIT_FAILURE);
     }
 
-    /* Initialise IPv4 address. */
-
-    struct timeval timeout = {5, 0};
-    struct sockaddr_in server_address, client_address;
-
-    memset (&server_address, 0, sizeof server_address);
-    memset (&client_address, 0, sizeof client_address);
-
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons (port);
-    server_address.sin_addr.s_addr = INADDR_ANY;
-
-    // Create UDP/TCP socket.
-
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
     int socket_fd;
 
-    if (protocol == TCP)
-        socket_fd = socket (AF_INET, SOCK_STREAM, 0);
-    else if (protocol == UDP)
-        socket_fd = socket (AF_INET, SOCK_DGRAM, 0);
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = (protocol == TCP) ? SOCK_STREAM : SOCK_DGRAM;
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_protocol = 0;
+    hints.ai_canonname = NULL;
+    hints.ai_addr = NULL;
+    hints.ai_next = NULL;
 
-    if (socket_fd == -1)
+    int s = getaddrinfo(NULL, argv[2], &hints, &result);
+    if (s != 0)
     {
-        perror ("socket");
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+        exit(EXIT_FAILURE);
+    }
+
+    for (rp = result; rp != NULL; rp = rp->ai_next)
+    {
+        socket_fd = socket(rp->ai_family, rp->ai_socktype,
+                           rp->ai_protocol);
+        if (socket_fd == -1)
+            continue;
+
+        if (bind(socket_fd, rp->ai_addr, rp->ai_addrlen) == 0)
+            break;                  /* Success */
+
+        close (socket_fd);
+    }
+
+    if (rp == NULL)                 /* No address succeeded */
+    {
+        fprintf(stderr, "Could not bind\n");
         exit (EXIT_FAILURE);
     }
 
-    /* Bind address to socket. */
-    if (bind (socket_fd, (struct sockaddr *)&server_address, sizeof server_address) == -1)
-    {
-        perror ("bind");
-        exit (EXIT_FAILURE);
-    }
+    freeaddrinfo (result);
 
     if (protocol == UDP)
     {
+        struct timeval timeout = {5, 0};
         setsockopt (socket_fd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(struct timeval));
-//        for (;; udp_reply (socket_fd, client_address));
-          for (;; udp_reply (socket_fd));
+
+        for (;; udp_reply (socket_fd));
     }
 
     if (listen (socket_fd, BACKLOG) == -1)
@@ -161,7 +171,6 @@ int main(int argc, char *argv[])
 
     while (protocol == TCP)
     {
-        /* Create pthread argument for each connection to client. */
         pthread_arg = (pthread_arg_t *) malloc (sizeof *pthread_arg);
         if (!pthread_arg)
         {
@@ -174,7 +183,7 @@ int main(int argc, char *argv[])
                                     &client_address_len);
 
         connections++;
-        
+
         if (tcp_socket_fd == -1)
         {
             perror ("accept");
@@ -190,8 +199,6 @@ int main(int argc, char *argv[])
         }
 
         printf ("New TCP connection accepted: now there are %i clients\n", connections);
-
-        /* Create thread to serve connection to client. */
         pthread_arg->new_socket_fd = tcp_socket_fd;
         if (pthread_create (&pthread, &pthread_attr, pthread_routine_tcp, (void *)pthread_arg) != 0)
         {
@@ -208,18 +215,18 @@ void *pthread_sysinfo ()
     char *s = system_state_report ();
     strcpy (system_state, s);
     free (s);
-    
-    for (;;) 
+
+    for (;;)
+    {
+        if (connections > 0 || protocol == UDP)
         {
-            if (connections > 0 || protocol == UDP)
-            {
-                s = system_state_report ();
-                pthread_rwlock_wrlock (&rwlock);
-                strcpy (system_state, s);
-                pthread_rwlock_unlock (&rwlock);
-                free (s);
-            }
+            s = system_state_report ();
+            pthread_rwlock_wrlock (&rwlock);
+            strcpy (system_state, s);
+            pthread_rwlock_unlock (&rwlock);
+            free (s);
         }
+    }
     return NULL;
 }
 
