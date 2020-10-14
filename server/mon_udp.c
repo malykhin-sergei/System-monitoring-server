@@ -1,11 +1,23 @@
+#define _POSIX_C_SOURCE 200112L
+#include <netinet/in.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <unistd.h>
 #include "main.h"
 
+extern pthread_rwlock_t rwlock;
 extern char system_state[4096];
 
-// int udp_reply (const int socket_fd, struct sockaddr_in client_address)
 int udp_reply (const int socket_fd)
 {
-    struct sockaddr_in client_address; // check
+    struct sockaddr_in client_address;
     socklen_t len = sizeof (client_address);
     char msg_buffer[80];
     bzero (msg_buffer, 80);
@@ -22,7 +34,6 @@ int udp_reply (const int socket_fd)
         sendto (socket_fd, system_state, strlen (system_state) + 1, 0,
                 (struct sockaddr*)&client_address, len);
         pthread_rwlock_unlock (&rwlock);
-//        printf ("%s\n", system_state);
     }
 
     return 0;

@@ -1,8 +1,28 @@
+#define _POSIX_C_SOURCE 200112L
+#include <netinet/in.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <unistd.h>
 #include "main.h"
+
+pthread_rwlock_t rwlock;
+
+typedef struct pthread_arg_t
+{
+    int new_socket_fd, socket_fd;
+    struct sockaddr_in client_address;
+} pthread_arg_t;
 
 int connections = 0;
 char system_state[4096];
-enum protocol_type protocol;
+enum { TCP, UDP } protocol;
 
 int main(int argc, char *argv[])
 {

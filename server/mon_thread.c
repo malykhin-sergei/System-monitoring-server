@@ -1,7 +1,26 @@
+#define _POSIX_C_SOURCE 200112L
+#include <netinet/in.h>
+#include <pthread.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <unistd.h>
 #include "main.h"
 
+typedef struct pthread_arg_t
+{
+    int new_socket_fd, socket_fd;
+    struct sockaddr_in client_address;
+} pthread_arg_t;
+
 extern int connections;
-char system_state[4096];
+extern char system_state[4096];
+extern pthread_rwlock_t rwlock;
 
 void *pthread_routine_tcp (void *arg)
 {

@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
     if (argc < 4)
     {
-        fprintf (stderr, "Usage: %s host port time_lag ...\n", argv[0]);
+        fprintf (stderr, "Usage: %s <host> <port> <update_time (seconds)>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 

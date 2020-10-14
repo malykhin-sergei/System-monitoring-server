@@ -15,17 +15,7 @@
 
 #define BACKLOG 50
 
-pthread_rwlock_t rwlock;
-
-typedef struct pthread_arg_t
-{
-    int new_socket_fd, socket_fd;
-    struct sockaddr_in client_address;
-} pthread_arg_t;
-
 char *system_state_report();
-
-enum protocol_type { TCP, UDP };
 
 /* Thread routine to observe system state */
 void *pthread_sysinfo ();
