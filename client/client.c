@@ -1,16 +1,16 @@
 #define _POSIX_C_SOURCE 200112L
 
-#include <sys/types.h>
-#include <sys/socket.h>
+#include "client.h"
+
 #include <netdb.h>
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <strings.h>
-#include <netinet/in.h>
-
-#define BUF_SIZE 500
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 // 127.0.0.1 27015 1
 
@@ -76,12 +76,12 @@ int main(int argc, char *argv[])
 
     for (;; sleep (time_lag))
     {
-        char msg[4096];
-        char s[256];
-        bzero (msg, 4096);
+        char msg[BUF_SIZE];
+        char s[BUF_SIZE];
+        bzero (msg, BUF_SIZE);
 
         write (sfd, "report", 6);
-        int server_response = read (sfd, msg, 4096);
+        int server_response = read (sfd, msg, BUF_SIZE);
         if (server_response <= 0)
         {
             printf ("Connection is closed by server\n");

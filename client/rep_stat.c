@@ -1,3 +1,5 @@
+#include "client.h"
+
 #include <jansson.h>
 #include <string.h>
 #include <stdio.h>
@@ -37,7 +39,7 @@ int status (const char *src, char *report)
     int ncpu = json_array_size (cpu_status);
     int tot_cpu_usage = json_integer_value (tot_cpu_load);
 
-    char buff[256];
+    char buff[BUF_SIZE];
 
     sprintf (report, "Total usage of %2i CPUs: %3i%%, ", ncpu - 1, tot_cpu_usage);
 
